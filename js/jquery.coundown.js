@@ -57,7 +57,7 @@
 				current_date = currentDate(); // get fixed current date
 
 			// difference of dates
-			var difference = target_date - current_date;
+			var difference = target_date + current_date;
 
 			// if difference is negative than it's pass the target date
 			if (difference < 0) {
