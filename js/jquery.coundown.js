@@ -1,65 +1,82 @@
-// Date Counter Plugin
-// Shows only total days between today and target date
-// Past date = counted days passed
-// Future date = remaining days
+// Date Counter Clock
+// Modified from Countdown Plugin
+// Counts total days from 21 Feb 2026 to today
 
 (function ($) {
-
-	$.fn.datecounter = function (options, callback) {
+	$.fn.countdown = function (options, callback) {
 
 		var settings = $.extend({
-			date: null,
+			date: "02/21/2026 05:00:00",
 			offset: 0,
 			day: 'day',
 			days: 'days'
 		}, options);
 
-		// Check date
-		if (!settings.date) {
-			$.error('Date is not defined.');
-		}
-
-		if (!Date.parse(settings.date)) {
-			$.error('Incorrect date format. Example: 12/24/2012');
-		}
-
+		// Save container
 		var container = this;
 
-		// Current date with timezone
+		/**
+		 * Change client's local date to match offset timezone
+		 */
 		var currentDate = function () {
+
 			var date = new Date();
+
 			var utc = date.getTime() + (date.getTimezoneOffset() * 60000);
-			return new Date(utc + (3600000 * settings.offset));
+
+			var new_date = new Date(utc + (3600000 * settings.offset));
+
+			return new_date;
 		};
 
-		// Main function
-		function updateCounter() {
+		/**
+		 * Main counter function
+		 */
+		function countdown() {
 
 			var target_date = new Date(settings.date),
 				current_date = currentDate();
 
-			// Difference
-			var difference = target_date - current_date;
+			// Difference in milliseconds
+			var difference = current_date - target_date;
 
-			var one_day = 1000 * 60 * 60 * 24;
+			// If before target date
+			if (difference < 0) {
+				difference = 0;
+			}
+
+			var _day = 1000 * 60 * 60 * 24;
 
 			// Total days only
-			var days = Math.abs(Math.floor(difference / one_day));
+			var days = Math.floor(difference / _day);
 
 			// Text
 			var text_days = (days === 1) ? settings.day : settings.days;
 
-			// Update HTML
+			// Add leading zero
+			days = (String(days).length >= 2) ? days : '0' + days;
+
+			// Set to DOM
 			container.find('.days').text(days);
 			container.find('.days_text').text(text_days);
+
+			// Clear unused fields
+			container.find('.hours').text('');
+			container.find('.minutes').text('');
+			container.find('.seconds').text('');
+
+			container.find('.hours_text').text('');
+			container.find('.minutes_text').text('');
+			container.find('.seconds_text').text('');
 
 			if (callback && typeof callback === 'function') {
 				callback(days);
 			}
 		}
 
-		updateCounter();
-		setInterval(updateCounter, 1000);
+		// Start
+		countdown();
+		var interval = setInterval(countdown, 1000);
 	};
 
 })(jQuery);
