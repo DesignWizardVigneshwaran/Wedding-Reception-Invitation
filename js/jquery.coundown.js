@@ -1,80 +1,93 @@
-// Date Counter Clock
-// Modified from Countdown Plugin
-// Counts total days from 21 Feb 2026 to today
+// CountUp Clock
+// Counts from 21 Feb 2026 to today
+// Shows Years, Days, Hours, Minutes, Seconds
 
 (function ($) {
 	$.fn.countdown = function (options, callback) {
 
 		var settings = $.extend({
-			date: "02/21/2026 05:00:00",
+			date: "02/22/2026 05:00:00",
 			offset: 0,
+			year: 'year',
+			years: 'years',
 			day: 'day',
-			days: 'days'
+			days: 'days',
+			hour: 'hour',
+			hours: 'hours',
+			minute: 'minute',
+			minutes: 'minutes',
+			second: 'second',
+			seconds: 'seconds'
 		}, options);
 
-		// Save container
 		var container = this;
 
-		/**
-		 * Change client's local date to match offset timezone
-		 */
+		// Current date with timezone offset
 		var currentDate = function () {
-
 			var date = new Date();
-
 			var utc = date.getTime() + (date.getTimezoneOffset() * 60000);
-
-			var new_date = new Date(utc + (3600000 * settings.offset));
-
-			return new_date;
+			return new Date(utc + (3600000 * settings.offset));
 		};
 
-		/**
-		 * Main counter function
-		 */
+		// Main function
 		function countdown() {
 
-			var target_date = new Date(settings.date),
+			var start_date = new Date(settings.date),
 				current_date = currentDate();
 
-			// Difference in milliseconds
-			var difference = current_date - target_date;
+			var difference = current_date - start_date;
 
-			// If before target date
+			// If before start date
 			if (difference < 0) {
 				difference = 0;
 			}
 
-			var _day = 1000 * 60 * 60 * 24;
+			// Time values
+			var _second = 1000,
+				_minute = _second * 60,
+				_hour = _minute * 60,
+				_day = _hour * 24,
+				_year = _day * 365;
 
-			// Total days only
-			var days = Math.floor(difference / _day);
+			// Calculate
+			var years = Math.floor(difference / _year);
+			var days = Math.floor((difference % _year) / _day);
+			var hours = Math.floor((difference % _day) / _hour);
+			var minutes = Math.floor((difference % _hour) / _minute);
+			var seconds = Math.floor((difference % _minute) / _second);
 
-			// Text
+			// Labels
+			var text_years = (years === 1) ? settings.year : settings.years;
 			var text_days = (days === 1) ? settings.day : settings.days;
+			var text_hours = (hours === 1) ? settings.hour : settings.hours;
+			var text_minutes = (minutes === 1) ? settings.minute : settings.minutes;
+			var text_seconds = (seconds === 1) ? settings.second : settings.seconds;
 
-			// Add leading zero
+			// Leading zero
+			years = (String(years).length >= 2) ? years : '0' + years;
 			days = (String(days).length >= 2) ? days : '0' + days;
+			hours = (String(hours).length >= 2) ? hours : '0' + hours;
+			minutes = (String(minutes).length >= 2) ? minutes : '0' + minutes;
+			seconds = (String(seconds).length >= 2) ? seconds : '0' + seconds;
 
-			// Set to DOM
+			// Update HTML
+			container.find('.years').text(years);
 			container.find('.days').text(days);
+			container.find('.hours').text(hours);
+			container.find('.minutes').text(minutes);
+			container.find('.seconds').text(seconds);
+
+			container.find('.years_text').text(text_years);
 			container.find('.days_text').text(text_days);
-
-			// Clear unused fields
-			container.find('.hours').text('');
-			container.find('.minutes').text('');
-			container.find('.seconds').text('');
-
-			container.find('.hours_text').text('');
-			container.find('.minutes_text').text('');
-			container.find('.seconds_text').text('');
+			container.find('.hours_text').text(text_hours);
+			container.find('.minutes_text').text(text_minutes);
+			container.find('.seconds_text').text(text_seconds);
 
 			if (callback && typeof callback === 'function') {
-				callback(days);
+				callback();
 			}
 		}
 
-		// Start
 		countdown();
 		var interval = setInterval(countdown, 1000);
 	};
